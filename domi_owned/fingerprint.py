@@ -24,61 +24,61 @@ from .main import DomiOwned
 
 class Fingerprint(DomiOwned):
 
-	def fingerprint(self):
-		"""
-		Get information about the Domino server.
-		"""
-		domino_version = self.get_version()
-		if domino_version:
-			self.logger.info("Domino version: {0}".format(domino_version))
-		else:
-			self.logger.warn('Unable to identify Domino server version')
+    def fingerprint(self):
+        """
+        Get information about the Domino server.
+        """
+        domino_version = self.get_version()
+        if domino_version:
+            self.logger.info("Domino version: {0}".format(domino_version))
+        else:
+            self.logger.warn('Unable to identify Domino server version')
 
-		# Get authentication type
-		self.logger.info("Authentication type: {0}".format(self.auth_type.capitalize()))
+        # Get authentication type
+        self.logger.info("Authentication type: {0}".format(self.auth_type.capitalize()))
 
-		# Check URL access
-		endpoints = self.check_access(self.username, self.password)
-		for endpoint in endpoints:
-			if endpoints[endpoint] is None:
-				self.logger.warn("Could not find {0}/{1}".format(self.url, endpoint))
-			elif endpoints[endpoint]:
-				if self.username:
-					self.logger.info("{0} has access to {1}/{2}".format(self.username, self.url, endpoint))
-				else:
-					self.logger.info("{0}/{1} does not require authentication".format(self.url, endpoint))
-			else:
-				if self.username:
-					self.logger.warn("{0} does not have access to {1}/{2}".format(self.username, self.url, endpoint))
-				else:
-					self.logger.warn("{0}/{1} requires authentication".format(self.url, endpoint))
+        # Check URL access
+        endpoints = self.check_access(self.username, self.password)
+        for endpoint in endpoints:
+            if endpoints[endpoint] is None:
+                self.logger.warn("Could not find {0}/{1}".format(self.url, endpoint))
+            elif endpoints[endpoint]:
+                if self.username:
+                    self.logger.info("{0} has access to {1}/{2}".format(self.username, self.url, endpoint))
+                else:
+                    self.logger.info("{0}/{1} does not require authentication".format(self.url, endpoint))
+            else:
+                if self.username:
+                    self.logger.warn("{0} does not have access to {1}/{2}".format(self.username, self.url, endpoint))
+                else:
+                    self.logger.warn("{0}/{1} requires authentication".format(self.url, endpoint))
 
-	def get_version(self):
-		"""
-		Get Domino server version.
-		"""
-		version_dirs = [
-			'download/filesets/l_LOTUS_SCRIPT.inf',
-			'download/filesets/n_LOTUS_SCRIPT.inf',
-			'download/filesets/l_SEARCH.inf',
-			'download/filesets/n_SEARCH.inf',
-			'api',
-			'homepage.nsf',
-			'help/readme.nsf?OpenAbout',
-			'iNotes/Forms5.nsf',
-			'iNotes/Forms6.nsf',
-			'iNotes/Forms7.nsf',
-			'iNotes/Forms8.nsf',
-			'iNotes/Forms9.nsf'
-		]
+    def get_version(self):
+        """
+        Get Domino server version.
+        """
+        version_dirs = [
+            'download/filesets/l_LOTUS_SCRIPT.inf',
+            'download/filesets/n_LOTUS_SCRIPT.inf',
+            'download/filesets/l_SEARCH.inf',
+            'download/filesets/n_SEARCH.inf',
+            'api',
+            'homepage.nsf',
+            'help/readme.nsf?OpenAbout',
+            'iNotes/Forms5.nsf',
+            'iNotes/Forms6.nsf',
+            'iNotes/Forms7.nsf',
+            'iNotes/Forms8.nsf',
+            'iNotes/Forms9.nsf'
+        ]
 
-		for version_dir in version_dirs:
-			try:
-				response = self.session.get("{0}/{1}".format(self.url, version_dir))
-			except (requests.exceptions.RequestException, requests.exceptions.ReadTimeoutError) as error:
-				break
+        for version_dir in version_dirs:
+            try:
+                response = self.session.get("{0}/{1}".format(self.url, version_dir))
+            except (requests.exceptions.RequestException, requests.exceptions.ReadTimeoutError) as error:
+                break
 
-			if self.utilities.VERSION_REGEX.search(response.text):
-				return self.utilities.VERSION_REGEX.search(response.text).group(1)
+            if self.utilities.VERSION_REGEX.search(response.text):
+                return self.utilities.VERSION_REGEX.search(response.text).group(1)
 
-		return None
+        return None

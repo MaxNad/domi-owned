@@ -1,0 +1,6 @@
+?OpenForm
+?ReadForm
+?SearchForm
+/$defaultform?OpenForm
+/$defaultform?ReadForm
+/$defaultform?SearchForm

@@ -24,105 +24,114 @@ import signal
 import sys
 import os
 
-from .main import DomiOwned
+import traceback
 
+from .main import DomiOwned
+from .tlsadapter import get_ssl_context
 
 class Enumerate(DomiOwned):
 
-	def enumerate(self, directories):
-		"""
-		Enumerate common Domino server URLs.
-		"""
-		self.check_access(self.username, self.password)
+    def enumerate(self, directories):
+        """
+        Enumerate common Domino server URLs.
+        """
+        self.check_access(self.username, self.password)
 
-		# Build directory list
-		urls = self.build_directories(directories)
+        # Build directory list
+        urls = self.build_directories(directories)
 
-		self.enum_dirs(urls)
+        self.enum_dirs(urls)
 
-	def build_directories(self, directories):
-		"""
-		Create list of Domino URLs to enumerate.
-		"""
-		urls = []
+    def build_directories(self, directories):
+        """
+        Create list of Domino URLs to enumerate.
+        """
+        urls = []
 
-		# Use the supplied Domino directory list
-		if directories is None:
-			endpoints = open(os.path.abspath('./domi_owned/data/domino_endpoints.txt'), 'r').readlines()
-			dirs = open(os.path.abspath('./domi_owned/data/domino_dirs.txt'), 'r').readlines()
+        # Use the supplied Domino directory list
+        if directories is None:
+            endpoints = open(os.path.abspath('./domi_owned/data/domino_endpoints.txt'), 'r').readlines()
+            dirs = open(os.path.abspath('./domi_owned/data/domino_dirs.txt'), 'r').readlines()
 
-			for endpoint in endpoints:
-				urls.append("{0}/{1}".format(self.url, endpoint.rstrip()))
+            for endpoint in endpoints:
+                urls.append("{0}/{1}".format(self.url, endpoint.rstrip()))
 
-			for combined_dir in list(itertools.product(dirs, endpoints)):
-				urls.append("{0}/{1}{2}".format(self.url, combined_dir[0].rstrip(), combined_dir[1].rstrip()))
+            for combined_dir in list(itertools.product(dirs, endpoints)):
+                urls.append("{0}/{1}{2}".format(self.url, combined_dir[0].rstrip(), combined_dir[1].rstrip()))
 
-		# Use the user supplied Domino directory list
-		else:
-			dirs = open(os.path.abspath(directories), 'r')
-			for combined_dir in dirs:
-				urls.append("{0}/{1}".format(self.url, combined_dir.lstrip('/').rstrip()))
+        # Use the user supplied Domino directory list
+        else:
+            dirs = open(os.path.abspath(directories), 'r')
+            for combined_dir in dirs:
+                urls.append("{0}/{1}".format(self.url, combined_dir.lstrip('/').rstrip()))
 
-		return urls
+        return urls
 
-	def signal_handler(self):
-		"""
-		Gracefully handle exiting enumeration.
-		"""
-		self.logger.debug('Got Ctrl-C, stopping all tasks...')
-		for task in asyncio.Task.all_tasks():
-			task.cancel()
+    def signal_handler(self):
+        """
+        Gracefully handle exiting enumeration.
+        """
+        self.logger.debug('Got Ctrl-C, stopping all tasks...')
+        for task in asyncio.Task.all_tasks():
+            task.cancel()
 
-	def enum_dirs(self, urls):
-		"""
-		Create client session based on authentication type.
-		"""
-		loop = asyncio.get_event_loop()
-		loop.add_signal_handler(signal.SIGINT, self.signal_handler)
+    def enum_dirs(self, urls):
+        """
+        Create client session based on authentication type.
+        """
+        loop = asyncio.get_event_loop()
+        loop.add_signal_handler(signal.SIGINT, self.signal_handler)
 
-		if self.username and self.auth_type == 'basic':
-			client = aiohttp.ClientSession(headers=self.utilities.HEADERS, auth=aiohttp.BasicAuth(self.username, self.password), loop=loop)
+        if self.username and self.auth_type == 'basic':
+            client = aiohttp.ClientSession(headers=self.utilities.HEADERS, auth=aiohttp.BasicAuth(self.username, self.password), loop=loop, connector=aiohttp.TCPConnector(ssl=get_ssl_context(not self.session.verify), limit=75))
 
-		elif self.auth_type == 'form':
-			# Check if cookies or SSO are being used for authentication
-			if 'DomAuthSessId' in self.session.cookies:
-				session_id = dict(DomAuthSessId=self.session.cookies['DomAuthSessId'])
-			elif 'LtpaToken' in self.session.cookies:
-				session_id = dict(LtpaToken=self.session.cookies['LtpaToken'])
-			else:
-				session_id = None
+        elif self.auth_type == 'form':
+            # Check if cookies or SSO are being used for authentication
+            if 'DomAuthSessId' in self.session.cookies:
+                session_id = dict(DomAuthSessId=self.session.cookies['DomAuthSessId'])
+            elif 'LtpaToken' in self.session.cookies:
+                session_id = dict(LtpaToken=self.session.cookies['LtpaToken'])
+            else:
+                session_id = None
 
-			client = aiohttp.ClientSession(headers=self.utilities.HEADERS, cookies=session_id, loop=loop)
+            client = aiohttp.ClientSession(headers=self.utilities.HEADERS, cookies=session_id, loop=loop, connector=aiohttp.TCPConnector(ssl=get_ssl_context(not self.session.verify), limit=75))
 
-		else:
-			client = aiohttp.ClientSession(headers=self.utilities.HEADERS, loop=loop)
+        else:
+            client = aiohttp.ClientSession(headers=self.utilities.HEADERS, loop=loop, connector=aiohttp.TCPConnector(ssl=get_ssl_context(not self.session.verify), limit=75))
 
-		with client as session:
-			try:
-				loop.run_until_complete(self.query(session, urls))
-			except asyncio.CancelledError:
-				sys.exit()
-			except Exception as error:
-				self.logger.error('An error occurred while enumerating Domino URLs')
-				sys.exit()
+        try:
+            task = loop.create_task(self.query(client, urls))
+            loop.run_until_complete(task)
+            loop.close()
+        except asyncio.CancelledError:
+            sys.exit()
+        except Exception as error:
+            self.logger.error('An error occurred while enumerating Domino URLs')
+            self.logger.error(error)
+            traceback.print_exc()
+            sys.exit()
 
-	async def query(self, session, urls):
-		"""
-		Build asynchronous requests.
-		"""
-		await asyncio.gather(*[self.get(session, url) for url in urls])
+    async def query(self, session, urls):
+        """
+        Build asynchronous requests.
+        """
+        await asyncio.gather(*[self.get(session, url) for url in urls])
+        await session.close()
 
-	async def get(self, session, url):
-		"""
-		Request account URL and parse response.
-		"""
-		async with session.get(url, compress=True) as response:
-			if self.auth_type == 'form' and self.utilities.FORM_REGEX.search(await response.text()):
-				return
+    async def get(self, session, url):
+        """
+        Request account URL and parse response.
+        """
+        try:
+            async with session.get(url, compress=True) as response:
+                if self.auth_type == 'form' and self.utilities.FORM_REGEX.search(await response.text()):
+                    return
 
-			if response.status == 200:
-				self.logger.info("200 - {0}".format(url))
-			elif response.status == 401:
-				self.logger.warning("401 - {0}".format(url))
-			else:
-				return
+                if response.status == 200:
+                    self.logger.info("200 - {0}".format(url))
+                elif response.status == 401:
+                    self.logger.warning("401 - {0}".format(url))
+                else:
+                    return
+        except asyncio.TimeoutError:
+            self.logger.warning("Timeout - {0}".format(url))

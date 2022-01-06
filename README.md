@@ -27,9 +27,6 @@ If a username and password are given, using the `--username` and `--password` ar
 #### Example: ####
 `./domi-owned.py fingerprint http://domino-server.com`
 
-[![asciicast](https://asciinema.org/a/70ai7hzvnpy9s725hn6csi95t.png)](https://asciinema.org/a/70ai7hzvnpy9s725hn6csi95t)
-
-
 ### Enumerate ###
 To enumerate what common or default Domino directories are accessible, run Domi-Owned with the `enumerate` action argument, and the server URL. Optionally, supply Domi-Owned with a username and password, using the `--username` and `--password` arguments, to see what directories that specific user has access to. To use a custom directory wordlist supply Domi-Owned with a file containing a list of web directories using the `--wordlist` argument.
 

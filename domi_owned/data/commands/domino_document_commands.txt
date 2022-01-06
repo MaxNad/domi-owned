@@ -1,0 +1,10 @@
+?OpenDocument
+?EditDocument
+?CreateDocument
+?SaveDocument
+?ReadViewEntries
+/$first?OpenDocument
+/$first?EditDocument
+/$first?CreateDocument
+/$first?SaveDocument
+/$first?ReadViewEntries
