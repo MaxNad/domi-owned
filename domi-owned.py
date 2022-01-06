@@ -30,7 +30,7 @@ from domi_owned.utilities import Banner
 
 
 def main():
-    parser = argparse.ArgumentParser(usage='./domi-owned.py [-k] [fingerprint, enumerate, bruteforce, hashdump, quickconsole] [-h]', formatter_class=argparse.RawDescriptionHelpFormatter, description=(Banner.SHOW))
+    parser = argparse.ArgumentParser(usage='./domi-owned.py [-k] [fingerprint, enumerate, bruteforce, hashdump, quickconsole commandscan] [-h]', formatter_class=argparse.RawDescriptionHelpFormatter, description=(Banner.SHOW))
     parser.add_argument('-k', '--ignore-cert-errors', help='Ignore TLS certificate errors', action='store_true')
     
     subparsers = parser.add_subparsers(dest='action', help='Action to perform on IBM/Lotus Domino server')

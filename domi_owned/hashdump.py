@@ -24,6 +24,8 @@ import inflect
 import signal
 import sys
 
+import traceback
+
 from .main import DomiOwned
 from .tlsadapter import get_ssl_context
 
@@ -121,6 +123,7 @@ class HashDump(DomiOwned):
         except Exception as error:
             self.logger.error('An error occurred while dumping Domino account hashes')
             self.logger.error(error)
+            traceback.print_exc()
             sys.exit()
 
     async def query(self, session, urls):

@@ -36,7 +36,7 @@ class Utilities(object):
     }
 
     URL_REGEX = re.compile(r'(https?:\/\/[\d\w.:-]+)', re.I)
-    FORM_REGEX = re.compile(r'method[\'\"= ]{1,4}post[\'\"]?', re.I)
+    FORM_REGEX = re.compile(r'action="[^"]*names.nsf\?Login"', re.I)
     OPEN_REGEX = re.compile(r'name[\'\"= ]{1,4}notesview[\'\"]?', re.I)
     ACCOUNT_REGEX = re.compile(r'/([a-f0-9]{32}/[a-f0-9]{32})', re.I)
     USER_FIELD_REGEX = re.compile(r'user.+', re.I)

@@ -94,10 +94,11 @@ class CommandScan(DomiOwned):
         Request account URL and parse response.
         """
         url = '{}/{}{}'.format(self.url, nsf, command)
+
         async with session.get(url, compress=True) as response:
             if self.auth_type == 'form' and self.utilities.FORM_REGEX.search(await response.text()):
+                self.logger.warning("Form Auth - {0}".format(url))
                 return
-
             if response.status == 200:
                 self.logger.info("200 - {0}".format(url))
             elif response.status == 401:
