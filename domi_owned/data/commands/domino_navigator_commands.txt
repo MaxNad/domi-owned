@@ -1,2 +1,4 @@
 ?OpenNavigator
 ?ReadEntries
+/$DefaultNav?OpenNavigator
+/$DefaultNav?OpenNav

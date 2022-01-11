@@ -4,3 +4,7 @@
 /$defaultform?OpenForm
 /$defaultform?ReadForm
 /$defaultform?SearchForm
+/$searchform?searchdomain
+/$searchform?searchsite
+/help?OpenHelp
+/$about?OpenAbout

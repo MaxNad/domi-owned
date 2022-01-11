@@ -30,6 +30,7 @@ busytime.nsf
 cad.nsf
 calendar.nsf
 catalog.nsf
+cdc.nsf
 cersvr.nsf
 certa.nsf
 certlog.nsf
@@ -49,6 +50,7 @@ customerdata
 customerdata.nsf
 da.nsf
 database.nsf
+daoscat.nsf
 dba4.nsf
 dbdirman.nsf
 dblist
@@ -87,6 +89,7 @@ domlog.nsf
 dpicfg.nsf
 dspug.nsf
 dspv.ntf
+edc.nsf
 event.nsf
 events4.nsf
 events5.nsf
@@ -146,6 +149,8 @@ hidden.nsf
 home.nsf
 homepage.nsf
 hostaddress.xml
+idvault.nsf
+inetlockout.nsf
 inotesforms5.nsf
 installa.nsf
 internet.nsf
@@ -206,6 +211,7 @@ monitoringviewtotallogins.jsp
 msdwda.nsf
 mtabtbls.nsf
 mtatbls.nsf
+mtdata.nsf
 mtstore.nsf
 namagent.nsf
 names.nsf
@@ -226,6 +232,7 @@ ntsync45.nsf
 ntsync4.nsf
 pagesw46
 pagesw46.nsf
+password.nsf
 patrol41.nsf
 perweb.nsf
 private.nsf
@@ -274,6 +281,7 @@ smtpibwq.nsf
 smtp.nsf
 smtpobwq.nsf
 smtptbls.nsf
+smupgrade.nsf
 smvlog.nsf
 software.nsf
 srvinst.nsf
@@ -325,4 +333,5 @@ welcome.nsf
 win.ini
 wksinst.nsf
 wwsample.nsf
+xnames.nsf
 zmevladm.nsf

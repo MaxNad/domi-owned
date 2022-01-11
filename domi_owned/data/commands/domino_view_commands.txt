@@ -1,3 +1,5 @@
 ?OpenView
 ?SearchView
 ?ReadDesign
+/$DefautlView?OpenView
+/$searchform?searchview
